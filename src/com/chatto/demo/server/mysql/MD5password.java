@@ -45,6 +45,6 @@ public class MD5password {
 //	 }
 	
 	public static void main (String[] args) {
-		System.out.println(MD5("nic640107"));
+		System.out.println(MD5("password_for_test"));
 	}
 }

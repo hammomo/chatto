@@ -12,6 +12,8 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JPasswordField;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Register extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -87,6 +89,11 @@ public class Register extends JFrame {
 		contentPane.add(lblPassword);
 		
 		pwdConfirmation = new JPasswordField();
+		pwdConfirmation.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) registerAction();
+			}
+		});
 		pwdConfirmation.setText("confirmation");
 		pwdConfirmation.setBounds(129, 240, 200, 26);
 		contentPane.add(pwdConfirmation);
@@ -98,26 +105,7 @@ public class Register extends JFrame {
 		JButton btnRegister = new JButton("注册");
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				boolean info = registerInfo();
-				if (info) {
-					RegisterClient rc = new RegisterClient(username, password);
-					if (rc.openConnection()) {
-						rc.sendUserInfo();
-						rc.getServerRequest();
-					} else {
-						System.out.println("Connection failed!");
-					}
-					System.out.println("The register action result is " + rc.getResult());
-					if (rc.getResult()) {
-						rc.closeResources();
-						dispose();
-						new Login();
-					} else {
-						txtUsername.setText("");
-					}
-				} else {
-					JOptionPane.showMessageDialog(null, "密码与确认密码不一致", "错误提示", JOptionPane.ERROR_MESSAGE);					
-				}
+				registerAction();
 			}
 		});
 		btnRegister.setBounds(129, 329, 117, 39);
@@ -136,6 +124,29 @@ public class Register extends JFrame {
 		else return false;
 	}
 
+	public void registerAction() {
+		boolean info = registerInfo();
+		if (info) {
+			RegisterClient rc = new RegisterClient(username, password);
+			if (rc.openConnection()) {
+				rc.sendUserInfo();
+				rc.getServerRequest();
+			} else {
+				System.out.println("Connection failed!");
+			}
+			System.out.println("The register action result is " + rc.getResult());
+			if (rc.getResult()) {
+				rc.closeResources();
+				dispose();
+				new Login();
+			} else {
+				txtUsername.setText("");
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "密码与确认密码不一致", "错误提示", JOptionPane.ERROR_MESSAGE);					
+		}
+	}
+	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
