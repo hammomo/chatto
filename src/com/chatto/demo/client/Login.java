@@ -23,6 +23,8 @@ public class Login extends JFrame {
 
 	public Login() {
 		setResizable(false);
+		
+		// 适应windows系统
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
@@ -95,12 +97,17 @@ public class Login extends JFrame {
 		if (lc.getResult()) {
 			dispose();
 			System.out.println("Login succeed!");
-//			new ChatWindow();
+//			lc.closeResources();
+			new ClientInterface(getName(), lc.getSocket());
 		} else {
 			System.out.println("Login failed!");
 			txtUsername.setText("");
 			pwdPassword.setText("");
 		}
+	}
+	
+	public String getName() {
+		return txtUsername.getText();
 	}
 	
 	public static void main(String[] args) {

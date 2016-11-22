@@ -31,6 +31,10 @@ public class LoginClient {
 		this.password = password;
 	}
 	
+	public Socket getSocket() {
+		return socket;
+	}
+	
 	public boolean openConnection() {
 		boolean openResult;
 		try {
@@ -54,7 +58,7 @@ public class LoginClient {
 			pw.flush();
 			pw.write(password + '\n');
 			pw.flush();
-			socket.shutdownOutput();
+//			socket.shutdownOutput();   // 暂时先不用关闭
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -80,6 +84,8 @@ public class LoginClient {
 			in.close();
 			pw.close();
 			out.close();
+			System.out.println("The socket isn't closed yet. It should be delivered to ClientInter.");
+			System.out.println("IP address: " +  socket.getInetAddress() + "\tPort: " + socket.getPort() + "\tLocal port: " + socket.getLocalPort());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

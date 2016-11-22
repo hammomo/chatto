@@ -81,7 +81,7 @@ public class RegisterClient {
 		pw.write(password + '\n'); 	// 写入密码
 		pw.flush(); 	// 刷新缓存
 		try {
-			socket.shutdownOutput(); 	// 关闭输出流
+			socket.shutdownOutput(); 	// 注册提交信息后关闭输出流，由登录界面再开启一个socket
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
