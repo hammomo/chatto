@@ -28,7 +28,8 @@ public class ClientInterface extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				
+				System.out.println("I've press the close key.");
+				userClient.closeClient();
 			}
 		});
 		

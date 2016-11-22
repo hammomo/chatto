@@ -26,7 +26,7 @@ public class LoginServer implements Runnable {
 	private String password;
 	private boolean loginResult;
 	private boolean running = false;
-	private Thread run, manage;
+	private Thread run, manage, getInfo;
 	
 	private List<OnlineClient> onlineUsers = new ArrayList<OnlineClient>();
 	
@@ -50,8 +50,9 @@ public class LoginServer implements Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			getClientInfo();
+			openInResourcs();
 			sendRequest();
+			
 			// 关闭相关资源
 //			try {
 //				if(pw != null)
@@ -62,10 +63,6 @@ public class LoginServer implements Runnable {
 //					in.close();
 //				if(inFromClient != null)
 //					inFromClient.close();
-//				if(clientSocket != null) {
-////					removeOnlineUsers(clientSocket); 	// 关闭TCP连接
-//					clientSocket.close();
-//				}
 //			} catch (Exception e) {
 //				e.printStackTrace();
 //			} 
@@ -95,42 +92,140 @@ public class LoginServer implements Runnable {
 		};
 		manage.start();
 	}
-	
-	public void getClientInfo() {
+
+	public void openInResourcs() {
 		try {
 			System.out.println(clientSocket.getInetAddress() + " : \t" + clientSocket.getPort());
 			in = clientSocket.getInputStream();
 			inFromClient = new BufferedReader(new InputStreamReader(in));
-			username = inFromClient.readLine();
-			password = inFromClient.readLine();
-			System.out.println("username: " + username);
-			System.out.println("password: " + password);
-			storeOnlineUsers();
-			clientSocket.shutdownInput();
+			String str = inFromClient.readLine();
+			System.out.println(str);
+			if (str.startsWith("/c/")) {
+				username = str.substring(3, str.length());
+				password = inFromClient.readLine();
+				System.out.println("username: " + username);
+				System.out.println("password: " + password);
+				loginResult = MySQLConnect.checkPassword(username, password);
+				if (loginResult) {
+					storeOnlineUsers();
+					getInfo(username);
+				}
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	// 等待从客户端发送信息，比如关闭窗口
+	public void getInfo(String username) {
+		getInfo = new Thread("GetInfo") {
+			public void run() {
+				
+				Socket singleSocket = null;
+				InputStream singleIn = null;
+				OutputStream singleOut = null;
+				BufferedReader singleInBR = null;
+				PrintWriter singlePW = null;
+				
+				try {
+					OnlineClient singleClient = getClient(username);
+					singleSocket = singleClient.getSocket();
+					singleIn = singleSocket.getInputStream();
+					singleOut = singleSocket.getOutputStream();
+					singleInBR = new BufferedReader(new InputStreamReader(singleIn));
+					singlePW = new PrintWriter(singleOut);
+					String message = "";
+					while (singleClient.getConnection()) {
+						try {
+							System.out.println("The getInfo function is running...");
+							Thread.sleep(10000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						String str = singleInBR.readLine();
+						System.out.println(str);
+						if (str.startsWith("/q/")) {
+							System.out.println("Start to remove the closed client from list...");
+							singlePW.write("close");
+							singlePW.flush();
+							removeOnlineUsers(username);
+							singleClient.setConnection(false);
+							break;
+						}
+					}
+					
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					try {
+						if(singlePW != null)
+							singlePW.close();
+						if(singleOut != null)
+							singleOut.close();
+						if(singleIn != null)
+							singleIn.close();
+						if(singleInBR != null)
+							singleInBR.close();
+						if(singleSocket != null)
+							singleSocket.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					System.out.println("The client resources have been closed...");
+				}
+			}
+		};
+		getInfo.start();
+	}
+	
+	// 将OnlineClient从List中取出
+	public OnlineClient getClient(String username) {
+		OnlineClient result = null;
+		for (int i = 0; i < onlineUsers.size(); i++) {
+			if (onlineUsers.get(i).getUsername().equals(username)) {
+				result = onlineUsers.get(i); 
+				break;
+			}
+		}
+		return result;
+	}
+	
 	// 将在线用户存入list中
 	public void storeOnlineUsers() {
-		onlineUsers.add(new OnlineClient(username, clientSocket.getInetAddress(), clientSocket.getPort()));
+		onlineUsers.add(new OnlineClient(username, clientSocket, clientSocket.getInetAddress(), clientSocket.getPort(), true));
 	}
 	
 	// 客户端关闭后将在线用户从list中移出
-	public void removeOnlineUsers(Socket socket) {
+	public void removeOnlineUsers(String username) {
 		for(int i = 0; i < onlineUsers.size(); i++) {
 			OnlineClient oc = onlineUsers.get(i);
-			if (socket.getInetAddress().toString().equals(oc.getAddress().toString()) && socket.getPort() == oc.getPort()) {
+			if (oc.getUsername().equals(username)) {
 				onlineUsers.remove(i);
 				break;
 			}
 		}
 	}
 	
+	// 关闭clientSocket资源
+	public void closeClientResources(Socket socket) {
+		try {
+			if(pw != null)
+				pw.close();
+			if(out != null)
+				out.close();
+			if(in != null)
+				in.close();
+			if(inFromClient != null)
+				inFromClient.close();
+			if(clientSocket != null)
+				clientSocket.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+	}
+	
 	public void sendRequest() {
 		try {
-			loginResult = MySQLConnect.checkPassword(username, password);
 			out = clientSocket.getOutputStream();
 			pw = new PrintWriter(out);
 			pw.write(loginResult + "\n");
@@ -140,5 +235,4 @@ public class LoginServer implements Runnable {
 		}
 	}
 	
-
 }

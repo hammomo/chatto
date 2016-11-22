@@ -54,7 +54,7 @@ public class LoginClient {
 		try {
 			out = socket.getOutputStream();
 			pw = new PrintWriter(out);
-			pw.write(username + '\n');
+			pw.write("/c/" + username + '\n');
 			pw.flush();
 			pw.write(password + '\n');
 			pw.flush();

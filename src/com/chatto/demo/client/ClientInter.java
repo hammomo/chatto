@@ -49,14 +49,14 @@ public class ClientInter {
 	}
 	
 	public void sendCloseInfo() {
-		pw.write("/q/\n");
+		pw.write("/q/" + username +"\n");
 		pw.flush();
-		pw.write(username + '\n');
-		pw.flush();
-		pw.write(address.toString() + '\n');
-		pw.flush();
-		pw.write(port + '\n');
-		pw.flush();
+//		pw.write(username + '\n');
+//		pw.flush();
+//		pw.write(address.toString() + '\n');
+//		pw.flush();
+//		pw.write(port + '\n');
+//		pw.flush();
 	}
 	
 	public void closeClient() {
