@@ -25,6 +25,8 @@ public class ClientInterface extends JFrame {
 	public ClientInterface(String username, Socket socket) {
 		userClient = new ClientInter(socket, username);
 		
+		userClient.getUsersUpdate();
+		
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {

@@ -20,7 +20,7 @@ public class Login extends JFrame {
 	private JPanel contentPane;
 	private JTextField txtUsername;
 	private JPasswordField pwdPassword;
-
+	
 	public Login() {
 		setResizable(false);
 		

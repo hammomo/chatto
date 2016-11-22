@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class ClientInter {
 	
@@ -19,6 +20,8 @@ public class ClientInter {
 	private OutputStream out;
 	private BufferedReader inFromServer;
 	private PrintWriter pw;
+	private boolean connection;
+	private Thread getUsersUpdate;
 	
 	// 用于传递参数的constructor
 	public ClientInter (Socket socket, String username) { 
@@ -27,7 +30,7 @@ public class ClientInter {
 		address = socket.getInetAddress();
 		port = socket.getPort();
 		System.out.println("LOL!!! I'm back... The client is still running: ");
-		System.out.println("IP address: " + socket.getInetAddress() + "\tPort: " + socket.getLocalPort() + "\tServer port: " + socket.getPort());
+		System.out.println("Username: " + username + "\tIP address: " + socket.getInetAddress() + "\tPort: " + socket.getLocalPort() + "\tServer port: " + socket.getPort());
 		openResources();
 	}
 	
@@ -38,6 +41,7 @@ public class ClientInter {
 			in = socket.getInputStream();
 			inFromServer = new BufferedReader(new InputStreamReader(in));
 			System.out.println("Resources have been opened again...");
+			connection = true;
 		} catch (IOException e) {
 			System.out.println("I'm dead. I can only ruin everything.");
 			e.printStackTrace();
@@ -51,12 +55,33 @@ public class ClientInter {
 	public void sendCloseInfo() {
 		pw.write("/q/" + username +"\n");
 		pw.flush();
-//		pw.write(username + '\n');
-//		pw.flush();
-//		pw.write(address.toString() + '\n');
-//		pw.flush();
-//		pw.write(port + '\n');
-//		pw.flush();
+	}
+	
+	public void getUsersUpdate() {
+		getUsersUpdate = new Thread("Update") {
+			public void run() {
+				String str = "";
+				while (connection) {
+					try {
+						pw.write("/u/" + username + '\n');
+						pw.flush();
+						str = inFromServer.readLine();
+						System.out.println(username + " : ");
+						String[] u = str.split("/u/|/n/|/e/");
+						String[] users = Arrays.copyOfRange(u, 1, u.length);
+						for (int i = 0; i < users.length; i++) {
+							System.out.println(users[i]);
+						}
+						Thread.sleep(10000);
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		};
+		getUsersUpdate.start();
 	}
 	
 	public void closeClient() {

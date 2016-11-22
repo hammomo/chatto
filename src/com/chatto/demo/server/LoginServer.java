@@ -92,6 +92,15 @@ public class LoginServer implements Runnable {
 		};
 		manage.start();
 	}
+	
+	private String getAllOnlineUsers() {
+		String users = "/u/";
+		for (int i = 0; i < onlineUsers.size() ; i++) {
+			users += onlineUsers.get(i).getUsername() + "/n/";
+		}
+		users += "/e/";
+		return users;
+	}
 
 	public void openInResourcs() {
 		try {
@@ -111,6 +120,7 @@ public class LoginServer implements Runnable {
 					getInfo(username);
 				}
 			}
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -136,21 +146,19 @@ public class LoginServer implements Runnable {
 					singlePW = new PrintWriter(singleOut);
 					String message = "";
 					while (singleClient.getConnection()) {
-						try {
-							System.out.println("The getInfo function is running...");
-							Thread.sleep(10000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
 						String str = singleInBR.readLine();
 						System.out.println(str);
 						if (str.startsWith("/q/")) {
 							System.out.println("Start to remove the closed client from list...");
-							singlePW.write("close");
-							singlePW.flush();
 							removeOnlineUsers(username);
 							singleClient.setConnection(false);
 							break;
+						} else if (str.startsWith("/u/") && onlineUsers.size() >= 1) {
+							System.out.println("Start to update the online users...");
+							String u = getAllOnlineUsers();
+							singlePW.write(u + '\n');
+							singlePW.flush();
+							System.out.println("Send online users to client...");
 						}
 					}
 					
@@ -207,22 +215,22 @@ public class LoginServer implements Runnable {
 	}
 	
 	// 关闭clientSocket资源
-	public void closeClientResources(Socket socket) {
-		try {
-			if(pw != null)
-				pw.close();
-			if(out != null)
-				out.close();
-			if(in != null)
-				in.close();
-			if(inFromClient != null)
-				inFromClient.close();
-			if(clientSocket != null)
-				clientSocket.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} 
-	}
+//	public void closeClientResources(Socket socket) {
+//		try {
+//			if(pw != null)
+//				pw.close();
+//			if(out != null)
+//				out.close();
+//			if(in != null)
+//				in.close();
+//			if(inFromClient != null)
+//				inFromClient.close();
+//			if(clientSocket != null)
+//				clientSocket.close();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} 
+//	}
 	
 	public void sendRequest() {
 		try {
