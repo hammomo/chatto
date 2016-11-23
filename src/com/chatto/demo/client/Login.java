@@ -7,6 +7,7 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -100,6 +101,7 @@ public class Login extends JFrame {
 //			lc.closeResources();
 			new ClientInterface(getName(), lc.getSocket());
 		} else {
+			JOptionPane.showMessageDialog(null, "用户或密码错误！", "提示", JOptionPane.ERROR_MESSAGE);
 			System.out.println("Login failed!");
 			txtUsername.setText("");
 			pwdPassword.setText("");

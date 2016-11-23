@@ -68,7 +68,7 @@ public class Register extends JFrame {
 				}
 				boolean check = rc.getResult();
 				if (check) {
-					JOptionPane.showMessageDialog(null, "用户名可用！", "提示", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, "用户名可用！", "提示", JOptionPane.INFORMATION_MESSAGE);
 				} else {
 					JOptionPane.showMessageDialog(null, "用户名已占用！", "错误提示", JOptionPane.ERROR_MESSAGE);
 					txtUsername.setText("");

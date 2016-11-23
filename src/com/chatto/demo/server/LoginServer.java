@@ -147,18 +147,15 @@ public class LoginServer implements Runnable {
 					String message = "";
 					while (singleClient.getConnection()) {
 						String str = singleInBR.readLine();
-						System.out.println(str);
 						if (str.startsWith("/q/")) {
 							System.out.println("Start to remove the closed client from list...");
 							removeOnlineUsers(username);
 							singleClient.setConnection(false);
 							break;
 						} else if (str.startsWith("/u/") && onlineUsers.size() >= 1) {
-							System.out.println("Start to update the online users...");
 							String u = getAllOnlineUsers();
 							singlePW.write(u + '\n');
 							singlePW.flush();
-							System.out.println("Send online users to client...");
 						}
 					}
 					
