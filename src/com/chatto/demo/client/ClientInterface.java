@@ -15,7 +15,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ClientInterface extends JFrame implements Runnable {
 	private static final long serialVersionUID = 1L;
@@ -24,8 +28,10 @@ public class ClientInterface extends JFrame implements Runnable {
 	private JTextField txtSearch;
 	private ClientInter userClient;
 	private JList<String> list;
-	private Thread update, run;
-	private boolean running = false;
+	private Thread update, run, select;
+	private boolean updateFlag = false, selectFlag = false;
+	private String selectedName;
+//	private String[] test = {"red", "yellow", "blue"};
 	
 	public ClientInterface(String username, Socket socket) {
 		userClient = new ClientInter(socket, username);
@@ -33,7 +39,8 @@ public class ClientInterface extends JFrame implements Runnable {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				running = false;
+				selectFlag = false;
+				updateFlag = false;
 				userClient.setConnection(false);
 				System.out.println("I've press the close key.");
 				update.interrupt();
@@ -62,6 +69,17 @@ public class ClientInterface extends JFrame implements Runnable {
 		contentPane.add(lblUsers);
 		
 		list = new JList<String>();
+//		list.setListData(test);
+		list.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (list.getSelectedIndex() != -1 && e.getClickCount() == 2) {
+					@SuppressWarnings("unchecked")
+					JList<String> theList = (JList<String>) e.getSource();
+					System.out.println(username + ": " +theList.getSelectedValue());
+				}
+				
+			}
+		});
 		list.setBackground(Color.WHITE);
 		list.setForeground(Color.DARK_GRAY);
 		list.setBounds(16, 46, 265, 414);
@@ -78,7 +96,7 @@ public class ClientInterface extends JFrame implements Runnable {
 		
 		setVisible(true);
 		
-		running = true;
+		updateFlag = true;
 		run = new Thread(this, "Running");
 		run.start();
 	}
@@ -99,10 +117,19 @@ public class ClientInterface extends JFrame implements Runnable {
 		update = new Thread("Update") {
 			public void run() {
 				String onlineUsers = "";
-				while (running) {
+				while (updateFlag) {
 					onlineUsers = userClient.getUsersUpdate();
 					String[] u = onlineUsers.split("/u/|/n/|/e/");
 					String[] users = Arrays.copyOfRange(u, 1, u.length);
+					List<String> theList = new ArrayList<String>();
+					theList.addAll(Arrays.asList(users));
+					for (int i = 0; i < theList.size(); i++) {
+						if(userClient.getUsername().equals(theList.get(i))) {
+							theList.remove(i);
+							break;
+						}
+					}
+					users = theList.toArray(new String[1]);
 					list.setListData(users);
 				}
 			}

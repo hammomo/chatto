@@ -10,8 +10,8 @@ import javax.swing.JFrame;
 public class Main extends JFrame {
 	private static final long serialVersionUID = 1L;
 
-	public Main() {
-	    setTitle("CenteredFrame");
+	public Main(String selectedName) {
+	    setTitle("与" + selectedName + "聊天中");
 	    addWindowListener(new WindowAdapter() {
 	      public void windowClosing(WindowEvent e) {
 	        System.exit(0);
@@ -22,11 +22,12 @@ public class Main extends JFrame {
 	    int screenHeight = screenSize.height;
 	    int screenWidth = screenSize.width;
 	    setSize(screenWidth / 2, screenHeight / 2);
-	    setLocation(screenWidth / 10, screenHeight / 4);
+	    setLocation(screenWidth / 3, screenHeight / 4);
+	    setVisible(true);
 	  }
 
 	  public static void main(String[] args) {
-	    JFrame frame = new Main();
+	    JFrame frame = new Main("TEST");
 	    frame.setVisible(true);
 	  }
 }
